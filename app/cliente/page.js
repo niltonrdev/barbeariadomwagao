@@ -142,9 +142,12 @@ function FidelidadeBarra({ fidelidade }) {
 }
 
 function StatusFila({ item, onSair }) {
-  const { estado, getBarbeiro, getServico } = useBarbearia();
+  const { estado, getBarbeiro, getServico, getCliente } = useBarbearia();
   const barbeiro = getBarbeiro(item.barbeiroId);
   const servico = getServico(item.servicoId);
+  const cliente = getCliente(item.clienteId);
+  const [pagando, setPagando] = useState(false);
+  const [pago, setPago] = useState(false);
 
   const { posicao, espera } = useMemo(() => {
     const aguardando = estado.fila
@@ -190,9 +193,32 @@ function StatusFila({ item, onSair }) {
         <Linha rotulo="Entrou na fila" valor={tempoRelativo(item.entrouEm)} />
       </div>
 
+      {pago ? (
+        <div className="rounded-xl border border-green-500/40 bg-green-500/10 p-4 text-center text-sm text-green-300">
+          ✓ Pagamento adiantado! É só confirmar com o barbeiro ao terminar.
+        </div>
+      ) : (
+        <button onClick={() => setPagando(true)} className="btn btn-ouro w-full">
+          Adiantar pagamento ({moeda(servico?.preco)})
+        </button>
+      )}
+
       <button onClick={onSair} className="btn btn-contorno w-full hover:border-red-500/50 hover:text-red-400">
         Sair da fila
       </button>
+
+      {pagando && (
+        <PagamentoModal
+          valor={servico?.preco || 0}
+          descricao={`${servico?.nome} — adiantar pagamento`}
+          cartaoSalvo={cliente?.cartaoSalvo}
+          onConfirmado={() => {
+            setPagando(false);
+            setPago(true);
+          }}
+          onFechar={() => setPagando(false)}
+        />
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import QrFake from "./QrFake";
 import { moeda } from "@/lib/format";
+import { gerarCodigoPix } from "@/lib/pix";
 
 export default function PagamentoModal({
   valor,
@@ -16,10 +17,7 @@ export default function PagamentoModal({
   const [copiado, setCopiado] = useState(false);
   const [novoCartao, setNovoCartao] = useState({ numero: "", validade: "", cvv: "", nome: "" });
 
-  const codigoPix =
-    "00020126580014BR.GOV.BCB.PIX0136dom-wagao-barbearia-demo52040000530398654" +
-    String(Math.round(valor * 100)).padStart(6, "0") +
-    "5802BR5920DOM WAGAO BARBEARIA6009SAO PAULO62070503***6304DEMO";
+  const codigoPix = gerarCodigoPix(valor);
 
   function confirmar(metodo) {
     setProcessando(true);

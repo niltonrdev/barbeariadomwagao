@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Logo from "@/components/Logo";
 import TelaCarregando from "@/components/TelaCarregando";
+import QrFake from "@/components/QrFake";
 import { useBarbearia } from "@/lib/store";
+import { gerarCodigoPix } from "@/lib/pix";
 import {
   moeda,
   tempoRelativo,
@@ -362,8 +364,22 @@ function ModalConcluir({ item, barbeiroId, onFechar }) {
             <span className="text-2xl font-bold texto-ouro">{moeda(total)}</span>
           </div>
 
+          {formaPagamento === "pix" && total > 0 && (
+            <div className="flex flex-col items-center gap-3 rounded-xl border border-ouro/40 bg-ouro/5 p-4">
+              <p className="text-center text-sm font-medium">
+                📲 Cliente escaneia para pagar <span className="texto-ouro font-bold">{moeda(total)}</span>
+              </p>
+              <QrFake semente={gerarCodigoPix(total)} tamanho={200} />
+              <p className="text-center text-xs text-nevoa">
+                O valor já vai preenchido no PIX. Confirme o recebimento antes de finalizar.
+              </p>
+            </div>
+          )}
+
           <button onClick={finalizar} className="btn btn-ouro w-full text-base">
-            Registrar e finalizar
+            {formaPagamento === "pix" && total > 0
+              ? "Confirmar recebimento e finalizar"
+              : "Registrar e finalizar"}
           </button>
         </div>
       </div>

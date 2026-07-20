@@ -5,7 +5,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import { useBarbearia } from "@/lib/store";
-import { formatarTelefone, soDigitos } from "@/lib/format";
+import {
+  formatarTelefone,
+  formatarDataBR,
+  dataBRparaISO,
+  soDigitos,
+} from "@/lib/format";
 
 const FREQUENCIAS = [
   { valor: 7, titulo: "Toda semana", sub: "Corte de 7 em 7 dias" },
@@ -39,6 +44,8 @@ function FormularioCadastro() {
     if (!form.nome.trim()) return setErro("Informe seu nome.");
     if (soDigitos(form.telefone).length < 10)
       return setErro("Telefone inválido.");
+    if (form.nascimento && !dataBRparaISO(form.nascimento))
+      return setErro("Data de nascimento inválida. Use DD/MM/AAAA.");
     if (!aceite) return setErro("É preciso aceitar os termos para continuar.");
 
     const existente = login(form.telefone);
@@ -48,7 +55,10 @@ function FormularioCadastro() {
       return;
     }
 
-    const novo = cadastrar(form);
+    const novo = cadastrar({
+      ...form,
+      nascimento: dataBRparaISO(form.nascimento),
+    });
     setSessao(novo.id);
     router.push("/cliente");
   }
@@ -84,7 +94,19 @@ function FormularioCadastro() {
           </Campo>
 
           <Campo label="Data de nascimento">
-            <input className="input" type="date" value={form.nascimento} onChange={set("nascimento")} />
+            <input
+              className="input"
+              inputMode="numeric"
+              placeholder="DD/MM/AAAA"
+              maxLength={10}
+              value={form.nascimento}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  nascimento: formatarDataBR(e.target.value),
+                }))
+              }
+            />
           </Campo>
 
           <div>
